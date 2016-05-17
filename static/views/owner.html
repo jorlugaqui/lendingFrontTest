@@ -1,0 +1,57 @@
+<h1>
+Owner info
+</h1>
+<form class="form-horizontal" ng-submit="saveOwner()">
+	<div class="control-group">
+		<label class="control-label" for="social_security_number">Social Security Number:</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.social_security_number" id="social_security_number" required/>
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for="first_name">First Name</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.first_name" id="first_name" required/>
+		</div>
+	</div>
+  <div class="control-group">
+		<label class="control-label" for="last_name">Last Name</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.last_name" id="last_name" required/>
+		</div>
+	</div>
+  <div class="control-group">
+		<label class="control-label" for="email">Email</label>
+		<div class="controls">
+			<input type="email" ng-model="owner.email" id="email" required/>
+		</div>
+	</div>
+	<div class="control-group">
+		<label class="control-label" for="address">Address</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.address" id="address" required/>
+		</div>
+	</div>
+  <div>
+		<label class="control-label" for="city">City</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.city" id="city" required/>
+		</div>
+	</div>
+  <div>
+		<label class="control-label" for="state">State</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.state" id="state" required/>
+		</div>
+	</div>
+  <div>
+		<label class="control-label" for="postal_code">Postal Code</label>
+		<div class="controls">
+			<input type="text" ng-model="owner.postal_code" id="postal_code" required/>
+		</div>
+	</div>
+  <br/>
+	<div class="control-group">
+		<input id="save" type="submit" class="btn btn-primary" value='Save' />
+	</div>
+</form>
