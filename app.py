@@ -4,6 +4,9 @@ import tornado.web
 import json
 from bson import json_util
 from pymongo import MongoClient
+from pymongo.errors import PyMongoError
+from datetime import datetime
+
 
 # Config templates and static path
 settings = {
@@ -13,8 +16,14 @@ settings = {
 }
 
 # Db config
-client = MongoClient('localhost', 27017)
-db = client['lending_front']
+try:
+    client = MongoClient('localhost', 27017)
+    db = client['lending_front']
+except PyMongoError:
+    # Better to log this instead or print it
+    print('Error trying to connect to the DB')
+    import sys
+    sys.exit()
 
 
 class IndexHandler(tornado.web.RequestHandler):
@@ -25,37 +34,61 @@ class IndexHandler(tornado.web.RequestHandler):
 
 
 class OwnerHandler(tornado.web.RequestHandler):
-    def get(self):
-        owners = db.owners.find()
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(list(owners), default=json_util.default))
-
     def post(self):
+        """Save owners info."""
         owner_data = json.loads(self.request.body)
-        db.owners.insert(owner_data)
+
+        response = {}
+        try:
+            db.owners.replace_one(
+                {
+                    'social_security_number':
+                        owner_data['social_security_number']
+                },
+                owner_data,
+                True
+            )
+            response['error'] = False
+            response['message'] = 'Owner recorded'
+            response['owner_id'] = owner_data['social_security_number']
+            response['first_name'] = owner_data['first_name']
+            response['last_name'] = owner_data['last_name']
+        except PyMongoError as e:
+            print(e.message)
+            response['error'] = True
+            response['data'] = 'Internal DB error'
+
         self.set_header("Content-Type", "application/json")
-        self.set_status(201)
+        if response['error']:
+            self.set_status(500)
+        else:
+            self.set_status(201)
+        self.write(json.dumps(response, default=json_util.default))
 
 
 class BusinessHandler(tornado.web.RequestHandler):
-    def get(self):
-        business = db.business.find()
-        self.set_header("Content-Type", "application/json")
-        self.write(json.dumps(list(business), default=json_util.default))
-
     def post(self):
         business_data = json.loads(self.request.body)
-        db.business.insert(business_data)
-        decision = analyze_data_and_take_decision(
-            business_data['requested_amount'])
-        response = {
-            'amount': business_data['requested_amount'],
-            'status': decision,
-            'company': business_data['name'],
-            'owner': 'Jorge Galvis'
-        }
+        business_data['date'] = datetime.now()
+        try:
+            db.business.insert(business_data)
+            decision = analyze_data_and_take_decision(
+                business_data['requested_amount'])
+
+            response = {
+                'amount': business_data['requested_amount'],
+                'status': decision,
+                'company': business_data['name'],
+                'owner_id': business_data['owner_id']
+            }
+            self.set_status(201)
+        except (PyMongoError, ValueError) as e:
+            print(e.message)
+            self.set_status(500)
+            response['error'] = True
+            response['data'] = 'Internal data error'
+
         self.set_header("Content-Type", "application/json")
-        self.set_status(201)
         self.write(json.dumps(response, default=json_util.default))
 
 
