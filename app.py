@@ -75,11 +75,16 @@ class BusinessHandler(tornado.web.RequestHandler):
             decision = analyze_data_and_take_decision(
                 business_data['requested_amount'])
 
+            owner = db.owners.find_one(
+                {"social_security_number": business_data['owner_id']})
+            full_name = "{} {}".format(owner["first_name"], owner["last_name"])
+
             response = {
                 'amount': business_data['requested_amount'],
                 'status': decision,
                 'company': business_data['name'],
-                'owner_id': business_data['owner_id']
+                'owner_id': business_data['owner_id'],
+                'full_name': full_name
             }
             self.set_status(201)
         except (PyMongoError, ValueError) as e:

@@ -57,6 +57,7 @@ function BusinessController($scope, $location, $cookies, Business) {
             $cookies.put('status', decision.status);
             $cookies.put('owner_id', decision.owner_id);
             $cookies.put('company', decision.company);
+            $cookies.put('full_name', decision.full_name);
             $location.path('/decision');
         }, function(error) {
             toastr.error(error.statusText);
@@ -71,6 +72,7 @@ function DecisionController($scope, $cookies) {
     $scope.decision.amount = $cookies.get('amount');
     $scope.decision.company = $cookies.get('company');
     $scope.decision.owner_id = $cookies.get('owner_id');
+    $scope.decision.full_name = $cookies.get('full_name');
 }
 
 
